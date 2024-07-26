@@ -22,7 +22,7 @@ pub const BLACKLISTED_EXE: &'static [&'static str] = &[
     "windowsinternal.composableshell.experiences.textinput.inputapp",
 ];
 
-pub fn is_blacklisted_exe(exe: &str) -> bool {
+pub fn is_blacklisted_window(exe: &str) -> bool {
     let exe_lowercase = exe.to_lowercase();
     let exe_lowercase = exe_lowercase.trim_end_matches(".exe");
 
