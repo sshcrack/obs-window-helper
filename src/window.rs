@@ -5,7 +5,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::string_conv::ToUtf8String;
+use crate::{get_thread_proc_id, string_conv::ToUtf8String, ProcessInfo};
 use anyhow::{anyhow, Result as AnyResult};
 use windows::{
     core::HSTRING,
@@ -28,7 +28,7 @@ use windows::{
             },
         },
         UI::WindowsAndMessaging::{
-            GetClassNameW, GetWindowTextLengthW, GetWindowTextW, GetWindowThreadProcessId,
+            GetClassNameW, GetWindowTextLengthW, GetWindowTextW,
         },
     },
 };
@@ -52,11 +52,7 @@ const SZ_HEX_CODE_PAGE_ID_UNICODE: &'static str = "04B0";
 ///
 /// Returns an error if there was a problem retrieving the executable path or process ID.
 pub fn get_exe(handle: HWND) -> AnyResult<(u32, PathBuf)> {
-    let mut proc_id = u32::default();
-    unsafe {
-        GetWindowThreadProcessId(handle, Some(&mut proc_id));
-    }
-
+    let ProcessInfo { process_id: proc_id, .. } = get_thread_proc_id(handle)?;
     let h_proc = unsafe {
         OpenProcess(
             PROCESS_QUERY_INFORMATION | PROCESS_VM_READ | PROCESS_TERMINATE,
@@ -101,7 +97,7 @@ pub fn get_title(handle: HWND) -> AnyResult<String> {
 }
 
 pub fn get_window_class(handle: HWND) -> WinResult<String> {
-    let mut class = [0 as u16; MAX_PATH as usize];
+    let mut class = [0 as u16; MAX_PATH as usize +1];
 
     let len = unsafe { GetClassNameW(handle, &mut class) };
     if len == 0 {
@@ -185,10 +181,7 @@ pub fn intersects_with_multiple_monitors(handle: HWND) -> WinResult<bool> {
 }
 
 pub fn get_command_line_args(wnd: HWND) -> WinResult<String> {
-    let mut proc_id = u32::default();
-    unsafe {
-        GetWindowThreadProcessId(wnd, Some(&mut proc_id));
-    }
+    let ProcessInfo { process_id: proc_id, ..} = get_thread_proc_id(wnd)?;
 
     let handle = unsafe {
         OpenProcess(

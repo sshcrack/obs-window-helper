@@ -52,7 +52,7 @@ pub fn is_window_cloaked(handle: HWND) -> bool {
 pub fn is_window_valid(handle: HWND, mode: WindowSearchMode) -> Result<bool> {
     let is_visible = unsafe { IsWindowVisible(handle) };
     if !is_visible.as_bool() {
-        return Ok(true);
+        return Ok(false);
     }
 
     if mode == WindowSearchMode::ExcludeMinimized {

@@ -7,7 +7,6 @@ pub trait StrLen<T> {
     fn strslice(&self) -> &[T];
 }
 
-
 impl<T: Default + PartialEq> StrLen<T> for [T] {
     fn strlen(&self) -> usize {
         let zero = &Default::default();
@@ -25,5 +24,7 @@ impl<T: Default + PartialEq> StrLen<T> for [T] {
 impl<T: AsRef<[u16]>> ToUtf8String for T {
     fn to_utf8(&self) -> String {
         String::from_utf16_lossy(self.as_ref().strslice())
+            .trim_end_matches("\0")
+            .to_string()
     }
 }
