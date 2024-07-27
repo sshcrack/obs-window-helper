@@ -1,5 +1,5 @@
 [package]
-name = "obs-window-helper"
+name = "libobs-window-helper"
 version = "0.1.0"
 description = "Provides a list of windows that can be captured by OBS"
 edition = "2021"
