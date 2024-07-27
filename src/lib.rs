@@ -1,7 +1,7 @@
 //! # OBS Window Helper
 //! This crate provides necessary information about windows that could be used
 //! so they can be captured with the `window_capture` or `game_capture` source in OBS.
-
+//! <br> The function you probably want to use is `get_all_windows` which returns a list of `WindowInfo` structs.
 
 
 #[cfg(not(windows))]
