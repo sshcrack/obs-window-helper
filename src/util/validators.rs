@@ -35,7 +35,7 @@ pub enum WindowSearchMode {
 
 type DWORD = u32;
 
-pub fn is_window_cloaked(handle: HWND) -> bool {
+pub(crate) fn is_window_cloaked(handle: HWND) -> bool {
     let cloaked: DWORD = 0;
     let res = unsafe {
         DwmGetWindowAttribute(

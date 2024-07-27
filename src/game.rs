@@ -1,5 +1,5 @@
-/// List is taken from https://github.com/obsproject/obs-studio/blob/ce6f9a4742b40b04e68ef759e0698bd5eac4360e/plugins/win-capture/game-capture.c#L1040
-pub const BLACKLISTED_EXE: &'static [&'static str] = &[
+/// List is taken from <https://github.com/obsproject/obs-studio/blob/ce6f9a4742b40b04e68ef759e0698bd5eac4360e/plugins/win-capture/game-capture.c#L1040>
+const BLACKLISTED_EXE: &'static [&'static str] = &[
     "explorer",
     "steam",
     "battle.net",

@@ -1,33 +1,27 @@
-use crate::{get_all_windows, get_window_info, get_window_info_test, monitor::get_monitor_id, validators::WindowSearchMode, win_iterator::first_window, WindowInfo};
+use crate::{get_all_windows, validators::WindowSearchMode, WindowInfo};
 
-/*
+
 #[test]
 pub fn test_iteration() {
-    let windows = get_all_windows().unwrap();
+    let res1 = get_all_windows(WindowSearchMode::ExcludeMinimized, false).unwrap();
+    let res2 = get_all_windows(WindowSearchMode::ExcludeMinimized, true).unwrap();
+
+    let res3 = get_all_windows(WindowSearchMode::IncludeMinimized, true).unwrap();
+    let res4 = get_all_windows(WindowSearchMode::IncludeMinimized, false).unwrap();
+
+    log_res(res1);
+    log_res(res2);
+    log_res(res3);
+    log_res(res4);
+}
+
+
+fn log_res(info: Vec<WindowInfo>) {
     #[cfg(feature="serde")]
     {
-        let json = serde_json::to_string_pretty(&windows).unwrap();
+        let json = serde_json::to_string_pretty(&info).unwrap();
         println!("{}", json)
     }
     #[cfg(not(feature="serde"))]
-    println!("{:?}", windows);
+    println!("{:?}", info);
 }
- */
-
-#[test]
-pub fn test_single() {
-    let pid = 3472;
-
-    let windows = get_all_windows().unwrap()
-    .into_iter()
-    .find(|e| e.pid == pid)
-    .unwrap();
-
-    #[cfg(feature="serde")]
-    {
-        let info = get_window_info_test(windows.handle, false).unwrap();
-        println!("{:#?}", info)
-    }
-    #[cfg(not(feature="serde"))]
-    println!("{:?}", windows);
-    }

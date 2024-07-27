@@ -1,3 +1,9 @@
+//! # OBS Window Helper
+//! This crate provides necessary information about windows that could be used
+//! so they can be captured with the `window_capture` or `game_capture` source in OBS.
+
+
+
 #[cfg(not(windows))]
 compile_error!("This library only supports windows!");
 
@@ -8,22 +14,27 @@ mod game;
 mod util;
 mod monitor;
 mod window;
-mod win_iterator;
 
-pub(crate) use util::*;
-
+pub use util::*;
 #[cfg(test)]
 mod test;
 
 pub use game::*;
 pub use helper::*;
-use validators::WindowSearchMode;
 use win_iterator::{first_window, next_window};
 use windows::Win32::{Foundation::HWND, System::Console::GetConsoleWindow};
 
-pub fn get_all_windows() -> anyhow::Result<Vec<WindowInfo>> {
-    let mode = WindowSearchMode::ExcludeMinimized;
-    let check_game = false;
+/// Retrieves information about all windows based on the specified search mode and game check flag.
+///
+/// # Arguments
+///
+/// * `mode` - The search mode to use for window enumeration.
+/// * `check_game` - A flag indicating wether a `game_capture` or a `window_capture` is used
+///
+/// # Returns
+///
+/// A `Result` containing a vector of `WindowInfo` structs representing the retrieved window information, or an `anyhow::Error` if an error occurs.
+pub fn get_all_windows(mode: WindowSearchMode, check_game: bool) -> anyhow::Result<Vec<WindowInfo>> {
     let mut use_find_window_ex = false;
 
     let mut parent = None as Option<HWND>;
