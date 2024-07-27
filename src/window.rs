@@ -32,7 +32,7 @@ use windows::{
         },
     },
 };
-use windows_result::{Error, Result as WinResult};
+use windows_result::Error;
 
 const SZ_STRING_FILE_INFO: &'static str = "StringFileInfo";
 const SZ_PRODUCT_NAME: &'static str = "ProductName";
@@ -66,9 +66,9 @@ pub fn get_exe(handle: HWND) -> AnyResult<(u32, PathBuf)> {
         // HMODULE should be null, not default
         let res = GetModuleFileNameExW(h_proc, HMODULE::default(), &mut path);
         if res > 0 {
-            Ok(path.as_ref().to_utf8())
+            Ok::<String, anyhow::Error>(path.as_ref().to_utf8())
         } else {
-            Err(Error::from_win32())
+            Err(Error::from_win32().into())
         }
     }?;
 
@@ -96,12 +96,12 @@ pub fn get_title(handle: HWND) -> AnyResult<String> {
     Ok(title.to_utf8())
 }
 
-pub fn get_window_class(handle: HWND) -> WinResult<String> {
+pub fn get_window_class(handle: HWND) -> AnyResult<String> {
     let mut class = [0 as u16; MAX_PATH as usize +1];
 
     let len = unsafe { GetClassNameW(handle, &mut class) };
     if len == 0 {
-        return Err(Error::from_win32());
+        return Err(Error::from_win32().into());
     }
 
     Ok(class.as_ref().to_utf8())
@@ -161,18 +161,18 @@ pub fn get_product_name(full_exe: &Path) -> AnyResult<String> {
     Ok(product_name)
 }
 
-pub fn hwnd_to_monitor(handle: HWND) -> WinResult<HMONITOR> {
+pub fn hwnd_to_monitor(handle: HWND) -> AnyResult<HMONITOR> {
     unsafe {
         let res = MonitorFromWindow(handle, MONITOR_DEFAULTTONEAREST);
         if res.is_invalid() {
-            return Err(Error::from_win32());
+            return Err(Error::from_win32().into());
         }
 
         Ok(res)
     }
 }
 
-pub fn intersects_with_multiple_monitors(handle: HWND) -> WinResult<bool> {
+pub fn intersects_with_multiple_monitors(handle: HWND) -> AnyResult<bool> {
     unsafe {
         let res = MonitorFromWindow(handle, MONITOR_DEFAULTTONULL);
 
@@ -180,7 +180,7 @@ pub fn intersects_with_multiple_monitors(handle: HWND) -> WinResult<bool> {
     }
 }
 
-pub fn get_command_line_args(wnd: HWND) -> WinResult<String> {
+pub fn get_command_line_args(wnd: HWND) -> AnyResult<String> {
     let ProcessInfo { process_id: proc_id, ..} = get_thread_proc_id(wnd)?;
 
     let handle = unsafe {
@@ -192,7 +192,7 @@ pub fn get_command_line_args(wnd: HWND) -> WinResult<String> {
     };
 
     if handle.is_invalid() {
-        return Err(Error::from_win32());
+        return Err(Error::from_win32().into());
     }
 
     let res = unsafe { get_command_line_args_priv(handle) };
@@ -203,7 +203,7 @@ pub fn get_command_line_args(wnd: HWND) -> WinResult<String> {
     res
 }
 
-unsafe fn get_command_line_args_priv(handle: HANDLE) -> WinResult<String> {
+unsafe fn get_command_line_args_priv(handle: HANDLE) -> AnyResult<String> {
     let mut pbi = PROCESS_BASIC_INFORMATION::default();
     // get process information
     NtQueryInformationProcess(
@@ -237,7 +237,7 @@ unsafe fn get_command_line_args_priv(handle: HANDLE) -> WinResult<String> {
     )?;
 
     // read ProcessParameters
-    let parameters = peb.as_ptr().add(process_parameter_offset); // address in remote process adress space
+    let parameters = *(peb.as_ptr().add(process_parameter_offset) as *const *const u8); // address in remote process adress space
 
     ReadProcessMemory(
         handle,               //

@@ -86,6 +86,54 @@ pub fn get_window_info(wnd: HWND, is_game: bool) -> AnyResult<WindowInfo> {
 }
 
 
+pub fn get_window_info_test(wnd: HWND, is_game: bool) -> AnyResult<WindowInfo> {
+    let (proc_id, full_exe) = get_exe(wnd)?;
+    let exe = full_exe
+        .file_name()
+        .ok_or(anyhow!("Failed to get file name"))?;
+    let exe = exe.to_str().ok_or(anyhow!("Failed to convert to str"))?;
+    let exe = exe.to_string();
+
+    if is_microsoft_internal_exe(&exe) {
+        return Err(anyhow!("Handle is a Microsoft internal exe"));
+    }
+
+    if exe == "obs64.exe" {
+        return Err(anyhow!("Handle is obs64.exe"));
+    }
+
+    if is_game && is_blacklisted_window(&exe) {
+        return Err(anyhow!("Handle is blacklisted (game mode)"));
+    }
+
+    let title = get_title(wnd).ok();
+    let class = get_window_class(wnd).ok();
+
+    let product_name = get_product_name(&full_exe).ok();
+    let monitor = Some(hwnd_to_monitor(wnd)?);
+    let intersects = intersects_with_multiple_monitors(wnd).ok();
+    let cmd_line = get_command_line_args(wnd).ok();
+    let monitor_id = if let Some(m) = monitor {
+        Some(get_monitor_id(m)?)
+    } else {
+        None
+    };
+
+    get_command_line_args(wnd)?;
+
+    Ok(WindowInfo {
+        full_exe: full_exe.to_string_lossy().to_string(),
+        obs_id: "".to_string(),
+        handle: wnd,
+        pid: proc_id,
+        title,
+        class,
+        product_name,
+        monitor: monitor_id,
+        intersects,
+        cmd_line,
+    })
+}
 
 pub struct ProcessInfo {
     pub process_id: u32,

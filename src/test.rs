@@ -1,4 +1,4 @@
-use crate::{get_all_windows, get_window_info, monitor::get_monitor_id, validators::WindowSearchMode, win_iterator::first_window, WindowInfo};
+use crate::{get_all_windows, get_window_info, get_window_info_test, monitor::get_monitor_id, validators::WindowSearchMode, win_iterator::first_window, WindowInfo};
 
 /*
 #[test]
@@ -25,7 +25,7 @@ pub fn test_single() {
 
     #[cfg(feature="serde")]
     {
-        let info = get_window_info(windows.handle, false).unwrap();
+        let info = get_window_info_test(windows.handle, false).unwrap();
         println!("{:#?}", info)
     }
     #[cfg(not(feature="serde"))]
